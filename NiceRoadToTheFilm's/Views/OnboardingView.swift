@@ -9,8 +9,9 @@ import SwiftUI
 
 struct OnboardingView: View {
     
+    let onFinish: () -> Void
+    
     @State private var pageIndex = 0
-    @State private var showPrestart = false
     
     private let pages: [DescribePage] = [
         .init(
@@ -57,7 +58,6 @@ struct OnboardingView: View {
             }
         }
         .animation(.easeInOut(duration: 0.35), value: pageIndex)
-        .animation(.easeInOut(duration: 0.5), value: showPrestart)
     }
     
     private var titleText: some View {
@@ -103,8 +103,7 @@ struct OnboardingView: View {
         if pageIndex < pages.count - 1 {
             pageIndex += 1
         } else {
-            showPrestart = true
-            
+            onFinish()
         }
     }
 }
@@ -118,5 +117,5 @@ private struct DescribePage {
 
 
 #Preview {
-    OnboardingView()
+    OnboardingView(onFinish: {} )
 }

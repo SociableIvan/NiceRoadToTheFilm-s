@@ -9,6 +9,8 @@ import SwiftUI
 
 struct FilmsScreenView: View {
     
+    @EnvironmentObject private var session: UserSession
+    
     @State private var showDetails: Bool = false
     @State private var selectedFilm: Film? = nil
     @State private var isFavoriteSelected = false
@@ -42,6 +44,14 @@ struct FilmsScreenView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: showDetails)
+        .onChange(of: selectedFilm?.id) { _ in
+            guard let film = selectedFilm else { return }
+            isFavoriteSelected = session.isFavorite(film)
+        }
+        .onChange(of: session.favoriteFilmIDs) { _ in
+            guard let film = selectedFilm else { return }
+            isFavoriteSelected = session.isFavorite(film)
+        }
     }
 
     private var navigationView: some View {
@@ -56,11 +66,17 @@ struct FilmsScreenView: View {
                 }
             },
             showsRightButton: showDetails,
+            rightIconName: "favorite",
+            rightSelectedIconName: "selectedFavorite",
             isRightSelected: $isFavoriteSelected,
-            rightAction: nil
+            rightAction: {
+                guard let film = selectedFilm else { return }
+                session.toggleFavorite(film)
+                isFavoriteSelected = session.isFavorite(film)
+            }
         )
     }
-    
+
     private func filmCell(_ film: Film) -> some View {
         Image(film.previewPicture)
             .resizable()
@@ -71,6 +87,7 @@ struct FilmsScreenView: View {
                 withAnimation(.easeInOut(duration: 0.25)) {
                     selectedFilm = film
                     showDetails = true
+                    isFavoriteSelected = session.isFavorite(film)
                 }
             }
     }

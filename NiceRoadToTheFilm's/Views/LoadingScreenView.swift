@@ -8,22 +8,31 @@
 import SwiftUI
 
 struct LoadingScreenView: View {
-    
+
+    let duration: Double
+    let onFinished: () -> Void
+
     @State private var isAnimating = false
-    
+    @State private var progress: Int = 0
+
     var body: some View {
         ZStack {
             Image("mainBGImage")
                 .resizable()
                 .ignoresSafeArea()
-            
+
             loadingAnimation
                 .frame(width: 165, height: 165)
         }
-        .onAppear { isAnimating = true }
-        .onDisappear { isAnimating = false }
+        .onAppear {
+            isAnimating = true
+            startProgress()
+        }
+        .onDisappear {
+            isAnimating = false
+        }
     }
-    
+
     private var loadingAnimation: some View {
         ZStack {
             Image("loadingImage")
@@ -31,27 +40,32 @@ struct LoadingScreenView: View {
                 .scaledToFit()
                 .rotationEffect(.degrees(isAnimating ? 360 : 0))
                 .animation(
-                    .linear(duration: 3).repeatForever(autoreverses: false),
+                    .linear(duration: duration).repeatForever(autoreverses: false),
                     value: isAnimating
                 )
-            
-            Text("Loading 50%")
+
+            Text("Loading \(progress)%")
                 .font(.patuaOne(.regular, size: 15))
                 .foregroundColor(.white)
                 .shadow(color: .black, radius: 4, x: 3, y: 1)
         }
     }
-    
-    private var titleText: some View {
-        Text("No connection")
-            .font(.patuaOne(.regular, size: 32))
-            .foregroundColor(.black)
+
+    private func startProgress() {
+        let steps = 100
+        let stepTime = duration / Double(steps)
+
+        Timer.scheduledTimer(withTimeInterval: stepTime, repeats: true) { timer in
+            if progress >= 100 {
+                timer.invalidate()
+                onFinished()
+            } else {
+                progress += 1
+            }
+        }
     }
 }
 
 #Preview {
-    ZStack {
-        Color.orange
-        LoadingScreenView()
-    }
+    LoadingScreenView(duration: 3.0, onFinished: {})
 }

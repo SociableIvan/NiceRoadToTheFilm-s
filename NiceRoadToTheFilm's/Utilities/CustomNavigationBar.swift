@@ -125,7 +125,6 @@ struct AppTopBar: View {
     private var rightButtonOrPlaceholder: some View {
         if showsRightButton {
             Button {
-                isRightSelected.toggle()
                 rightAction?()
             } label: {
                 Image(isRightSelected ? rightSelectedIconName : rightIconName)

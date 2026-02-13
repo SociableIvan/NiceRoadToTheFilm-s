@@ -35,6 +35,7 @@ struct HomeScreenView: View {
                     
                 }
                 .padding(.top, 10)
+                .transition(.opacity)
             } else {
                 Image("directorImage")
                     .resizable()
@@ -74,7 +75,9 @@ struct HomeScreenView: View {
 
     private var infoButton: some View {
         Button {
-            showInfo = true
+            withAnimation(.easeInOut(duration: 0.3)) {
+                showInfo = true
+            }
         } label: {
             Image("infoIcon")
                 .resizable()

@@ -32,5 +32,12 @@ extension Font {
     enum SeymourOneWeight: String {
         case regular = "SeymourOne"
     }
+    
+    static func inter(_ weight: InterOneWeight, size: CGFloat) -> Font {
+        Font.custom(weight.rawValue, size: size)
+    }
+    
+    enum InterOneWeight: String {
+        case semibold = "Inter-SemiBold"
+    }
 }
-

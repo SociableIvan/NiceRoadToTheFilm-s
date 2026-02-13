@@ -8,18 +8,24 @@
 import SwiftUI
 
 struct FavoritesScreenView: View {
-    
-    @State private var showDetails: Bool = false
+
+    @EnvironmentObject private var session: UserSession
+
+    @State private var showDetails = false
     @State private var selectedFilm: Film? = nil
     @State private var isFavoriteSelected = false
-    
-    private let films = FilmsData.all
-    
+
+    private let allFilms = FilmsData.all
+
     private let columns = [
         GridItem(.flexible(), spacing: 16),
         GridItem(.flexible(), spacing: 16)
     ]
-    
+
+    private var favoriteFilms: [Film] {
+        allFilms.filter { session.favoriteFilmIDs.contains($0.id) }
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             navigationView
@@ -30,7 +36,7 @@ struct FavoritesScreenView: View {
             } else {
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 20) {
-                        ForEach(films) { film in
+                        ForEach(favoriteFilms) { film in
                             filmCell(film)
                         }
                     }
@@ -42,11 +48,20 @@ struct FavoritesScreenView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: showDetails)
+        .onChange(of: session.favoriteFilmIDs) { _ in
+            
+            if let film = selectedFilm, !session.isFavorite(film) {
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    showDetails = false
+                    selectedFilm = nil
+                }
+            }
+        }
     }
-    
+
     private var navigationView: some View {
         AppTopBar(
-            title: showDetails ? (selectedFilm?.filmName ?? "Films") : "Favorites",
+            title: showDetails ? (selectedFilm?.filmName ?? "Favorites") : "Favorites",
             titleFont: showDetails ? .seymourOne(.regular, size: 20) : .patuaOne(.regular, size: 30),
             showsBackButton: showDetails,
             backAction: {
@@ -56,11 +71,16 @@ struct FavoritesScreenView: View {
                 }
             },
             showsRightButton: showDetails,
+            rightIconName: "favorite",
+            rightSelectedIconName: "selectedFavorite",
             isRightSelected: $isFavoriteSelected,
-            rightAction: nil
+            rightAction: {
+                guard let film = selectedFilm else { return }
+                session.toggleFavorite(film)
+            }
         )
     }
-    
+
     private func filmCell(_ film: Film) -> some View {
         ZStack(alignment: .topTrailing) {
             Image(film.previewPicture)
@@ -72,11 +92,12 @@ struct FavoritesScreenView: View {
                     withAnimation(.easeInOut(duration: 0.25)) {
                         selectedFilm = film
                         showDetails = true
+                        isFavoriteSelected = true
                     }
                 }
-            
+
             Button {
-                
+                session.removeFavorite(film)
             } label: {
                 Image("selectedFavorite")
                     .resizable()
@@ -85,10 +106,7 @@ struct FavoritesScreenView: View {
                     .padding(.trailing, 10)
                     .padding(.top, 10)
             }
+            .buttonStyle(.plain)
         }
     }
-}
-#Preview {
-//    FavoritesScreenView()
-    MainTabbarView()
 }

@@ -38,48 +38,76 @@ struct MainTabbarView: View {
                 .resizable()
                 .ignoresSafeArea()
             )
+            
+            if let activeOverlay {
+                switch activeOverlay {
+                    case .userPhotoMenu:
+                    Color.white.opacity(0.25)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            withAnimation(.easeInOut(duration: 0.25)) {
+                                self.activeOverlay = nil
+                            }
+                        }
+                        .transition(.opacity)
+                        .zIndex(50)
+
+                    UserPhotoBottomSheet(
+                        onClose: {
+                            withAnimation(.easeInOut(duration: 0.25)) {
+                                self.activeOverlay = nil
+                            }
+                        },
+                        onFirst: {
+                            withAnimation(.easeInOut(duration: 0.25)) { self.activeOverlay = nil }
+//                            showAvatarPicker = true
+                        },
+                        onSecond: {
+                            withAnimation(.easeInOut(duration: 0.25)) { self.activeOverlay = nil }
+                            if UIImagePickerController.isSourceTypeAvailable(.camera) {
+//                                showCameraPicker = true
+                            } else {
+//                                showNoCameraAlert = true
+                            }
+                        }
+                    )
+                    .transition(.move(edge: .bottom))
+                    .zIndex(60)
+
+                    case .privacyPolicy:
+                        PrivacyPolicyView(onBack: { self.activeOverlay = nil })
+                        .transition(.opacity)
+                        .zIndex(80)
+
+                    case .terms:
+                        TermsOfUseView(onBack: { self.activeOverlay = nil })
+                            .transition(.opacity)
+                            .zIndex(80)
+                    }
+                }
         }
-    }
-//    var body: some View {
-////        NavigationView {
-//            ZStack {
-//                VStack(spacing: 0) {
-//                    contentView
-//                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-//
-//                    CustomTabBarView(selectedTab: $selectedTab)
-//                        .frame(height: tabBarHeight)
-//                        .background(Color.mainTabBG)
+//        .contentShape(Rectangle())
+//            .simultaneousGesture(
+//                TapGesture().onEnded {
+//                    AppSounds.playTapIfAllowed(soundEnabled)
 //                }
-//                .ignoresSafeArea(edges: .vertical)
-//                .background(
-//                    Image("mainBGImage")
-//                        .resizable()
-//                        .ignoresSafeArea()
-//                )
-//            }
-////            .navigationTitle(navTitle)
-////            .navigationBarTitleDisplayMode(.inline)
-////            .navigationBarBackButtonHidden(true)
-////        }
-////        .navigationViewStyle(.stack)
-////        .onAppear {
-////            NavigationBarStyle.apply()
-////        }
-//    }
-    
-//    private var navTitle: String {
-//            switch selectedTab {
-//            case 0: return "Home"
-//            case 1: return "Films"
-//            case 2: return "Favorites"
-//            case 3: return "Settings"
-//            default: return ""
+//            )
+//        .sheet(isPresented: $showAvatarPicker) {
+//            AvatarPickerSheet { image in
+//                session.updateAvatar(image)
 //            }
 //        }
-    
-    
-    
+//        .sheet(isPresented: $showCameraPicker) {
+//            CameraPicker { image in
+//                session.updateAvatar(image)
+//            }
+//        }
+//        .alert("Camera is not available", isPresented: $showNoCameraAlert) {
+//            Button("OK", role: .cancel) { }
+//        
+//        }
+    }
+
     @ViewBuilder
     private var contentView: some View {
         switch selectedTab {
@@ -92,12 +120,12 @@ struct MainTabbarView: View {
         case 3:
             SettingsScreenView(
                 onOpenPrivacyPolicy: { activeOverlay = .privacyPolicy },
-                    onOpenTerms: { activeOverlay = .terms },
-                    onOpenPhotoMenu: {
-                        withAnimation(.easeInOut(duration: 0.25)) {
-                            activeOverlay = .userPhotoMenu
-                        }
+                onOpenTerms: { activeOverlay = .terms },
+                onOpenPhotoMenu: {
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        activeOverlay = .userPhotoMenu
                     }
+                }
             )
         default:
             Color.clear
@@ -146,32 +174,5 @@ struct MainTabbarView: View {
 
 #Preview {
     MainTabbarView()
+        .environmentObject(UserSession())
 }
-
-
-
-
-//import UIKit
-//
-//enum NavigationBarStyle {
-//
-//    static func apply() {
-//        let appearance = UINavigationBarAppearance()
-//        appearance.configureWithTransparentBackground()
-//        appearance.backgroundColor = UIColor.mainTabBG
-//
-////        let titleFont = UIFont(name: "SeymourOne-Regular", size: 20) ?? .systemFont(ofSize: 20, weight: .semibold)
-//        let titleFont = UIFont(name: "PatuaOne-Regular", size: 30) ?? .systemFont(ofSize: 20, weight: .semibold)
-//
-//        appearance.titleTextAttributes = [
-//            .font: titleFont,
-//            .foregroundColor: UIColor.white
-//        ]
-//
-//        UINavigationBar.appearance().standardAppearance = appearance
-//        UINavigationBar.appearance().scrollEdgeAppearance = appearance
-//        UINavigationBar.appearance().compactAppearance = appearance
-//
-//        UINavigationBar.appearance().tintColor = .white
-//    }
-//}
