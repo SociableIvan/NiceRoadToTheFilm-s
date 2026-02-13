@@ -11,7 +11,7 @@ import SwiftUI
 struct NiceRoadToTheFilm_sApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainTabbarView()
         }
     }
 }
