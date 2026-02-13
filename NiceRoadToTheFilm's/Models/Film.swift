@@ -8,7 +8,6 @@
 import Foundation
 
 struct Film: Identifiable, Hashable {
-//    let id = UUID()
     let id: String
     let filmName: String
     let previewPicture: String

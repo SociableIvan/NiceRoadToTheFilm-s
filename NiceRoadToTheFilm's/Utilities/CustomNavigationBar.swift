@@ -14,12 +14,10 @@ struct AppTopBar: View {
     let height: CGFloat
     let backgroundColor: Color
 
-    // Left (Back)
     let showsBackButton: Bool
     let backIconName: String
     let backAction: (() -> Void)?
 
-    // Right (Favorite)
     let showsRightButton: Bool
     let rightIconName: String
     let rightSelectedIconName: String

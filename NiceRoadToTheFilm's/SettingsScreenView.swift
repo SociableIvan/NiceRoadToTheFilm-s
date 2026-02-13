@@ -54,31 +54,30 @@ struct SettingsScreenView: View {
                     .scaledToFit()
                     .frame(width: 130)
                 
-                Image("gallerry")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 65)
+                
                 
                 Image("plusButtonImage")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 45)
                     .padding(.top, 110)
-
-//                if let uiImage = session.avatarUIImage {
-//                    Image(uiImage: uiImage)
-//                        .resizable()
-//                        .scaledToFill()
-//                        .frame(width: 74, height: 74)
-//                        .clipShape(Circle())
-//                        .offset(y: -5)
-//                } else {
-//                    Image("userProfileIcon")
-//                        .resizable()
-//                        .scaledToFit()
-//                        .frame(width: 48)
-//                        .offset(y: -5)
-//                }
+                
+                if let avatar = session.loadAvatarUIImage() {
+                    Image(uiImage: avatar)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 100, height: 100)
+                        .clipShape(Circle())
+                        .overlay(
+                            Circle().stroke(Color.white, lineWidth: 2)
+                        )
+                        .offset(y: -5)
+                } else {
+                    Image("gallerry")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 65)
+                }
             }
         }
         .buttonStyle(.plain)

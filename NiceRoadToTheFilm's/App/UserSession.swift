@@ -5,11 +5,15 @@
 //  Created by Ivan Solohub on 13.02.2026.
 //
 
+import UIKit
 import Foundation
 import Combine
+import SwiftUI
 
 final class UserSession: ObservableObject {
 
+    @AppStorage("soundEnabled") private var soundEnabled: Bool = false
+    
     // MARK: - Keys
     private let favoritesKey = "favoriteFilmIDs"
     private let userKey = "userProfile"
@@ -20,7 +24,7 @@ final class UserSession: ObservableObject {
 
     // MARK: - Init
     init() {
-        // user
+       
         if let data = UserDefaults.standard.data(forKey: userKey),
            let savedUser = try? JSONDecoder().decode(User.self, from: data) {
             self.user = savedUser
@@ -33,7 +37,6 @@ final class UserSession: ObservableObject {
             )
         }
 
-        // favorites
         loadFavorites()
     }
 
@@ -71,6 +74,53 @@ final class UserSession: ObservableObject {
         user.musicEnable = value
         saveUser()
     }
+    
+    // MARK: - Avatar
+        func updateAvatar(_ image: UIImage) {
+            guard let fileName = saveAvatarToDisk(image) else { return }
+            user.imageName = fileName
+            saveUser()
+        }
+
+        func removeAvatar() {
+            deleteAvatarFromDiskIfNeeded()
+            user.imageName = ""
+            saveUser()
+        }
+
+        func loadAvatarUIImage() -> UIImage? {
+            guard !user.imageName.isEmpty else { return nil }
+            let url = avatarFileURL(fileName: user.imageName)
+            guard let data = try? Data(contentsOf: url) else { return nil }
+            return UIImage(data: data)
+        }
+
+        private func saveAvatarToDisk(_ image: UIImage) -> String? {
+            deleteAvatarFromDiskIfNeeded()
+
+            let fileName = "avatar.jpg"
+            let url = avatarFileURL(fileName: fileName)
+
+            guard let data = image.jpegData(compressionQuality: 0.85) else { return nil }
+
+            do {
+                try data.write(to: url, options: [.atomic])
+                return fileName
+            } catch {
+                return nil
+            }
+        }
+
+        private func deleteAvatarFromDiskIfNeeded() {
+            guard !user.imageName.isEmpty else { return }
+            let url = avatarFileURL(fileName: user.imageName)
+            try? FileManager.default.removeItem(at: url)
+        }
+
+        private func avatarFileURL(fileName: String) -> URL {
+            let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+            return docs.appendingPathComponent(fileName)
+        }
 
     // MARK: - Persistence
     private func saveFavorites() {

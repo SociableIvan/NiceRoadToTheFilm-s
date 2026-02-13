@@ -6,15 +6,19 @@
 //
 
 import SwiftUI
+import AVFoundation
 
 struct MainTabbarView: View {
     
+    @EnvironmentObject private var session: UserSession
+    @State private var showAvatarPicker = false
+    @State private var showCameraPicker = false
+    @State private var showCameraAccessAlert = false
+    @State private var showNoCameraAlert = false
     @State private var selectedTab = 0
+    @State private var activeOverlay: ActiveOverlay? = nil
     
     private let tabBarHeight: CGFloat = 104
-    
-    @AppStorage("soundEnabled") private var soundEnabled: Bool = false
-    @State private var activeOverlay: ActiveOverlay? = nil
     
     private enum ActiveOverlay {
         case userPhotoMenu
@@ -60,15 +64,11 @@ struct MainTabbarView: View {
                         },
                         onFirst: {
                             withAnimation(.easeInOut(duration: 0.25)) { self.activeOverlay = nil }
-//                            showAvatarPicker = true
+                                showAvatarPicker = true
                         },
                         onSecond: {
                             withAnimation(.easeInOut(duration: 0.25)) { self.activeOverlay = nil }
-                            if UIImagePickerController.isSourceTypeAvailable(.camera) {
-//                                showCameraPicker = true
-                            } else {
-//                                showNoCameraAlert = true
-                            }
+                            openCameraWithPermissionCheck()
                         }
                     )
                     .transition(.move(edge: .bottom))
@@ -85,27 +85,39 @@ struct MainTabbarView: View {
                             .zIndex(80)
                     }
                 }
+            
+            
         }
-//        .contentShape(Rectangle())
-//            .simultaneousGesture(
-//                TapGesture().onEnded {
-//                    AppSounds.playTapIfAllowed(soundEnabled)
-//                }
-//            )
-//        .sheet(isPresented: $showAvatarPicker) {
-//            AvatarPickerSheet { image in
-//                session.updateAvatar(image)
-//            }
-//        }
-//        .sheet(isPresented: $showCameraPicker) {
-//            CameraPicker { image in
-//                session.updateAvatar(image)
-//            }
-//        }
-//        .alert("Camera is not available", isPresented: $showNoCameraAlert) {
-//            Button("OK", role: .cancel) { }
-//        
-//        }
+        .sheet(isPresented: $showAvatarPicker) {
+            AvatarPickerSheet { image in
+                session.updateAvatar(image)
+            }
+        }
+        .fullScreenCover(isPresented: $showCameraPicker) {
+            CameraPicker { image in
+                session.updateAvatar(image)
+            }
+            .ignoresSafeArea()
+        }
+        .alert("Camera Access Needed", isPresented: $showCameraAccessAlert) {
+            Button("Open Settings") {
+                guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+                UIApplication.shared.open(url)
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Allow camera access in Settings to take a picture.")
+        }
+        .alert("Camera is not available", isPresented: $showNoCameraAlert) {
+            Button("OK", role: .cancel) { }
+        }
+        .contentShape(Rectangle())
+            .simultaneousGesture(
+                TapGesture().onEnded {
+                    AppSounds.playTapIfAllowed(session.user.soundEnable)
+                }
+            )
+
     }
 
     @ViewBuilder
@@ -171,6 +183,38 @@ struct MainTabbarView: View {
     }
 }
 
+extension MainTabbarView {
+    private func openCameraWithPermissionCheck() {
+        guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
+            showNoCameraAlert = true
+            return
+        }
+
+        let status = AVCaptureDevice.authorizationStatus(for: .video)
+
+        switch status {
+        case .authorized:
+            showCameraPicker = true
+
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                DispatchQueue.main.async {
+                    if granted {
+                        showCameraPicker = true
+                    } else {
+                        showCameraAccessAlert = true
+                    }
+                }
+            }
+
+        case .denied, .restricted:
+            showCameraAccessAlert = true
+
+        @unknown default:
+            showCameraAccessAlert = true
+        }
+    }
+}
 
 #Preview {
     MainTabbarView()
