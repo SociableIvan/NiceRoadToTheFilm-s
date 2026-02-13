@@ -39,6 +39,7 @@ final class UserSession: ObservableObject {
         }
 
         loadFavorites()
+        BackgroundMusicPlayer.shared.apply(isEnabled: user.musicEnable)
     }
     
     func updateScreenMetricsIfNeeded() {
@@ -82,6 +83,7 @@ final class UserSession: ObservableObject {
     func setMusicEnabled(_ value: Bool) {
         user.musicEnable = value
         saveUser()
+        BackgroundMusicPlayer.shared.apply(isEnabled: value)
     }
     
     // MARK: - Avatar

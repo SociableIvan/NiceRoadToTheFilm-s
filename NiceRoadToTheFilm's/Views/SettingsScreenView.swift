@@ -37,7 +37,7 @@ struct SettingsScreenView: View {
             } else {
                 userPhotoButton
                 inputUserNameTF
-                    .padding(.top, 10)
+                    .padding(.top, 20)
                 
                 settingsSwitchers
                     .padding(.top, 30)
@@ -55,36 +55,37 @@ struct SettingsScreenView: View {
             
         )
     }
-    
+
     private var userPhotoButton: some View {
         Button {
             onOpenPhotoMenu()
         } label: {
-            ZStack {
-                Image("UserImageFrame")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 130)
-                
-                
-                
-                Image("plusButtonImage")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 45)
-                    .padding(.top, 110)
-                
-                if let avatar = session.loadAvatarUIImage() {
+            if let avatar = session.loadAvatarUIImage() {
+                ZStack {
+                    Image("UserImageFrame")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 134)
+                    
                     Image(uiImage: avatar)
                         .resizable()
                         .scaledToFill()
-                        .frame(width: 100, height: 100)
-                        .clipShape(Circle())
-                        .overlay(
-                            Circle().stroke(Color.white, lineWidth: 2)
-                        )
-                        .offset(y: -5)
-                } else {
+                        .frame(width: 130, height: 130)
+                        .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+                }
+            } else {
+                ZStack {
+                    Image("UserImageFrame")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 130)
+
+                    Image("plusButtonImage")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 45)
+                        .padding(.top, 110)
+
                     Image("gallerry")
                         .resizable()
                         .scaledToFit()
@@ -251,6 +252,6 @@ struct SettingsScreenView: View {
     }
 }
 #Preview {
-    MainTabbarView()
-        .environmentObject(UserSession())
+        MainTabbarView()
+            .environmentObject(UserSession())
 }
