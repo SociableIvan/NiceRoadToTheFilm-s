@@ -47,6 +47,9 @@ struct NiceRoadToTheFilm_sApp: App {
                     MainTabbarView()
                         .environmentObject(session)
                         .transition(.opacity)
+                        .onAppear {
+                            session.updateScreenMetricsIfNeeded()
+                        }
                 }
             }
         }

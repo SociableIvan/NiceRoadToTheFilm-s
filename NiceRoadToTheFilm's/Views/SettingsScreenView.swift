@@ -19,20 +19,32 @@ struct SettingsScreenView: View {
     @State private var isEditingName = false
     @State private var draftName: String = ""
     
-    
     var body: some View {
         VStack {
             navigationView
-            
-            userPhotoButton
-            inputUserNameTF
-                .padding(.top, 10)
-            
-            settingsSwitchers
-                .padding(.top, 30)
-            
-            Spacer()
-            bottomButtons
+            if session.isSmallScreen {
+                ScrollView(showsIndicators: false) {
+                    userPhotoButton
+                    inputUserNameTF
+                        .padding(.top, 10)
+                    
+                    settingsSwitchers
+                        .padding(.top, 30)
+                    
+                    Spacer()
+                    bottomButtons
+                }
+            } else {
+                userPhotoButton
+                inputUserNameTF
+                    .padding(.top, 10)
+                
+                settingsSwitchers
+                    .padding(.top, 30)
+                
+                Spacer()
+                bottomButtons
+            }
         }
     }
     

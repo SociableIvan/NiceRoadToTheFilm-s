@@ -21,6 +21,7 @@ final class UserSession: ObservableObject {
     // MARK: - Published
     @Published private(set) var favoriteFilmIDs: Set<String> = []
     @Published var user: User
+    @Published private(set) var isSmallScreen: Bool = false
 
     // MARK: - Init
     init() {
@@ -38,6 +39,14 @@ final class UserSession: ObservableObject {
         }
 
         loadFavorites()
+    }
+    
+    func updateScreenMetricsIfNeeded() {
+        let size = UIScreen.main.bounds.size
+        let minSide = min(size.width, size.height)
+        let maxSide = max(size.width, size.height)
+
+        isSmallScreen = (minSide <= 375 && maxSide <= 667)
     }
 
     // MARK: - Favorites API

@@ -18,7 +18,9 @@ struct MainTabbarView: View {
     @State private var selectedTab = 0
     @State private var activeOverlay: ActiveOverlay? = nil
     
-    private let tabBarHeight: CGFloat = 104
+    private var tabBarHeight: CGFloat {
+        session.isSmallScreen ? 80 : 104
+    }
     
     private enum ActiveOverlay {
         case userPhotoMenu
@@ -32,10 +34,10 @@ struct MainTabbarView: View {
                 contentView
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     
-                CustomTabBarView(selectedTab: $selectedTab)
+                CustomTabBarView(selectedTab: $selectedTab,
+                                 isSmallScreen: session.isSmallScreen)
                     .frame(height: tabBarHeight)
                     .background(Color.mainTabBG)
-                    
             }
             .ignoresSafeArea(edges: .vertical)
             .background(Image("mainBGImage")
@@ -146,7 +148,8 @@ struct MainTabbarView: View {
     
     private struct CustomTabBarView: View {
         @Binding var selectedTab: Int
-
+        let isSmallScreen: Bool
+        
         var body: some View {
             HStack {
                 tabButton(imageName: "home", selectedImageName: "selectedHome", index: 0)
@@ -176,7 +179,7 @@ struct MainTabbarView: View {
                 Image(isSelected ? selectedImageName : imageName)
                     .resizable()
                     .scaledToFit()
-                    .frame(height: 47)
+                    .frame(height: isSmallScreen ? 35 : 47)
             }
             .buttonStyle(.plain)
         }

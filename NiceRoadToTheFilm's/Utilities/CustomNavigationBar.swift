@@ -9,9 +9,11 @@ import SwiftUI
 
 struct AppTopBar: View {
 
+    @EnvironmentObject private var session: UserSession
+    @Binding var isRightSelected: Bool
+
     let title: String
     let titleFont: Font
-    let height: CGFloat
     let backgroundColor: Color
 
     let showsBackButton: Bool
@@ -21,7 +23,6 @@ struct AppTopBar: View {
     let showsRightButton: Bool
     let rightIconName: String
     let rightSelectedIconName: String
-    @Binding var isRightSelected: Bool
     let rightAction: (() -> Void)?
 
     let horizontalPadding: CGFloat
@@ -31,7 +32,6 @@ struct AppTopBar: View {
     init(
         title: String,
         titleFont: Font = .system(size: 18, weight: .semibold),
-        height: CGFloat = 110,
         backgroundColor: Color = .mainTabBG,
 
         showsBackButton: Bool = false,
@@ -50,7 +50,6 @@ struct AppTopBar: View {
     ) {
         self.title = title
         self.titleFont = titleFont
-        self.height = height
         self.backgroundColor = backgroundColor
 
         self.showsBackButton = showsBackButton
@@ -66,6 +65,10 @@ struct AppTopBar: View {
         self.horizontalPadding = horizontalPadding
         self.iconSize = iconSize
         self.bottomPadding = bottomPadding
+    }
+
+    private var barHeight: CGFloat {
+        session.isSmallScreen ? 90 : 110
     }
 
     var body: some View {
@@ -94,7 +97,7 @@ struct AppTopBar: View {
                 .padding(.bottom, bottomPadding)
             }
         }
-        .frame(height: height)
+        .frame(height: barHeight)
         .frame(maxWidth: .infinity)
     }
 
